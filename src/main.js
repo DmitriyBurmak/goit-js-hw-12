@@ -36,6 +36,8 @@ form.addEventListener('submit', async e => {
   totalHits = 0;
 
   hideLoadMoreButton();
+  loadingMessage.classList.remove('hidden');
+  loadingMessage.classList.add('visible');
   clearGallery();
   showLoader();
 
@@ -45,11 +47,12 @@ form.addEventListener('submit', async e => {
 
     if (data.hits.length === 0) {
       iziToast.error({
-        message: 'Sorry, no images found. Please try a different search.',
+        message: "We're sorry, but you've reached the end of search results.",
         position: 'topRight',
       });
     } else {
       createGallery(data.hits, totalHits);
+
       const loadedImages = document.querySelectorAll('.gallery-item').length;
       if (loadedImages < totalHits) {
         showLoadMoreButton();
@@ -62,6 +65,8 @@ form.addEventListener('submit', async e => {
     });
   } finally {
     hideLoader();
+    loadingMessage.classList.remove('visible');
+    loadingMessage.classList.add('hidden');
   }
 });
 
