@@ -33,11 +33,13 @@ form.addEventListener('submit', async e => {
 
   currentQuery = query;
   currentPage = 1;
-  clearGallery();
+  totalHits = 0;
+
   hideLoadMoreButton();
+  clearGallery();
+  showLoader();
 
   try {
-    showLoader();
     const data = await getImagesByQuery(currentQuery, currentPage);
     totalHits = data.totalHits;
 
@@ -47,8 +49,9 @@ form.addEventListener('submit', async e => {
         position: 'topRight',
       });
     } else {
-      createGallery(data.hits);
-      if (totalHits > currentPage * 15) {
+      createGallery(data.hits, totalHits);
+      const loadedImages = document.querySelectorAll('.gallery-item').length;
+      if (loadedImages < totalHits) {
         showLoadMoreButton();
       }
     }
@@ -62,13 +65,19 @@ form.addEventListener('submit', async e => {
   }
 });
 
+const loadingMessage = document.querySelector('.loading-message');
+
 loadMoreBtn.addEventListener('click', async () => {
   currentPage += 1;
 
+  loadMoreBtn.classList.add('hidden');
+  loadingMessage.classList.remove('hidden');
+  loadingMessage.classList.add('visible');
+  showLoader();
+
   try {
-    showLoader();
     const data = await getImagesByQuery(currentQuery, currentPage);
-    createGallery(data.hits);
+    createGallery(data.hits, totalHits);
 
     const cardHeight = document
       .querySelector('.gallery-item')
@@ -80,12 +89,15 @@ loadMoreBtn.addEventListener('click', async () => {
     });
 
     const loadedImages = document.querySelectorAll('.gallery-item').length;
+
     if (loadedImages >= totalHits) {
       hideLoadMoreButton();
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
         position: 'topRight',
       });
+    } else {
+      showLoadMoreButton();
     }
   } catch (error) {
     iziToast.error({
@@ -94,5 +106,7 @@ loadMoreBtn.addEventListener('click', async () => {
     });
   } finally {
     hideLoader();
+    loadingMessage.classList.remove('visible');
+    loadingMessage.classList.add('hidden');
   }
 });
