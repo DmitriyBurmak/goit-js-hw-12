@@ -16,7 +16,7 @@ export async function getImagesByQuery(query, page = 1) {
         page,
       },
     });
-    return response.data; // повертає весь об'єкт (totalHits, hits, інше)
+    return response.data;
   } catch (error) {
     console.error('Error fetching images: ', error);
     throw error;
