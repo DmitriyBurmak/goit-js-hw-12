@@ -20,6 +20,22 @@ let currentQuery = '';
 let currentPage = 1;
 let totalHits = 0;
 
+// Затримка
+function delay(ms) {
+  console.log('⏳ delaying...');
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function showLoadingMessage() {
+  loadingMessage.classList.remove('hidden');
+  loadingMessage.classList.add('visible');
+}
+
+function hideLoadingMessage() {
+  loadingMessage.classList.remove('visible');
+  loadingMessage.classList.add('hidden');
+}
+
 form.addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -38,13 +54,10 @@ form.addEventListener('submit', async e => {
 
   hideLoadMoreButton();
   clearGallery();
+  showLoader();
+  showLoadingMessage();
 
-  // Показати сповіщення завантаження
-  loadingMessage.classList.remove('hidden');
-  loadingMessage.classList.add('visible');
-
-  // Затримка 2 секунди
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await delay(1000);
 
   try {
     const data = await getImagesByQuery(currentQuery, currentPage);
@@ -57,8 +70,8 @@ form.addEventListener('submit', async e => {
       });
     } else {
       createGallery(data.hits, totalHits);
-
       const loadedImages = document.querySelectorAll('.gallery-item').length;
+
       if (loadedImages < totalHits) {
         showLoadMoreButton();
       } else {
@@ -76,19 +89,18 @@ form.addEventListener('submit', async e => {
     });
   } finally {
     hideLoader();
-    loadingMessage.classList.remove('visible');
-    loadingMessage.classList.add('hidden');
+    hideLoadingMessage();
   }
 });
 
 loadMoreBtn.addEventListener('click', async () => {
   currentPage += 1;
 
-  // Показуємо повідомлення замість кнопки
-  loadMoreBtn.classList.add('hidden');
-  loadingMessage.classList.remove('hidden');
-  loadingMessage.classList.add('visible');
+  hideLoadMoreButton();
   showLoader();
+  showLoadingMessage();
+
+  await delay(1000);
 
   try {
     const data = await getImagesByQuery(currentQuery, currentPage);
@@ -121,7 +133,6 @@ loadMoreBtn.addEventListener('click', async () => {
     });
   } finally {
     hideLoader();
-    loadingMessage.classList.remove('visible');
-    loadingMessage.classList.add('hidden');
+    hideLoadingMessage();
   }
 });
